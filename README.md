@@ -20,10 +20,7 @@ Step 2. Add the dependency
 	        //或者implementation 'com.gitlab.linpeixu:recyclerview:1.0.0'
 	}
 ```
-工程地址：[https://github.com/linpeixu/RecyclerView](https://github.com/linpeixu/RecyclerView)
-更新说明：[https://github.com/linpeixu/RecyclerView/releases](https://github.com/linpeixu/RecyclerView/releases)
-工程地址：[https://gitlab.com/linpeixu/recyclerview](https://gitlab.com/linpeixu/recyclerview)
-更新说明：[https://gitlab.com/linpeixu/recyclerview/-/releases](https://gitlab.com/linpeixu/recyclerview/-/releases)
+
 
 android的日常开发中经常需要使用到列表控件，最开始的时候我们使用的是ListView，随着业务的复杂性上升，页面布局不再单一，ListView的局限性越发凸显，好在google为我们提供了使用更灵活，扩展性更强大的RecyclerView，相比ListView的布局单一，RecyclerView拥有更多的布局方式，如线性布局（竖直方向或水平方向），表格布局，瀑布流布局，翻页布局（类似ViewPager）等，且支持局部刷新。
 
