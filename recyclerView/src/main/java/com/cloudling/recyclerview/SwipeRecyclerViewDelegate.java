@@ -163,6 +163,63 @@ public class SwipeRecyclerViewDelegate<T> {
         return this;
     }
 
+    public SwipeRecyclerViewDelegate<T> build(OnScrollBottomHelpListener onScrollBottomHelpListener) {
+        mAdapter = new RecyclerViewAdapter<>(mIFAdapter);
+        mHeadAdapter = new HeadRecyclerAdapter(mAdapter);
+        mRecyclerView.setAdapter(mHeadAdapter);
+        if (mIFLoadOp != null) {
+            mIFLoadOp.getRefreshLayout().setOnRefreshListener(() -> {
+                type = TYPE.REFRESH;
+                mIFLoadOp.onRefresh();
+            });
+            mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                    super.onScrollStateChanged(recyclerView, newState);
+                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                        /*滑动停止*/
+                    }
+                }
+
+                @Override
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    /*得到当前显示的最后一个item的view*/
+                    View lastChildView = recyclerView.getLayoutManager().getChildAt(recyclerView.getLayoutManager().getChildCount() - 1);
+                    /*得到lastChildView的bottom坐标值*/
+                    int lastChildBottom = lastChildView.getBottom();
+                    /*得到Recyclerview的底部坐标减去底部padding值，也就是显示内容最底部的坐标*/
+                    int recyclerBottom = recyclerView.getBottom() - recyclerView.getPaddingBottom();
+                    /*通过这个lastChildView得到这个view当前的position值*/
+                    int lastPosition = recyclerView.getLayoutManager().getPosition(lastChildView);
+                    /*判断lastChildView的bottom值跟recyclerBottom
+                    判断lastPosition是不是最后一个position
+                    如果两个条件都满足则说明是真正的滑动到了底部*/
+                    if ((lastChildBottom == recyclerBottom && lastPosition == recyclerView.getLayoutManager().getItemCount() - 1)
+                            || (onScrollBottomHelpListener != null && onScrollBottomHelpListener.onScrollToBottom(lastChildBottom, recyclerBottom, lastPosition, (recyclerView.getLayoutManager().getItemCount() - 1)))) {
+                        /*滑动到底了*/
+                        if (type == TYPE.NORMAL && mHasMore) {
+                            type = TYPE.LOADMORE;
+                            if (mIFLoading != null) {
+                                mIFLoading.loading(mLoadHint);
+                            }
+                            mIFLoadOp.onLoadMore();
+                        }
+                    }
+
+                }
+            });
+        }
+        return this;
+    }
+
+    /**
+     * 辅助处理是否滚动到底部（当我们有设置ItemDecoration的时候，则lastChildBottom需要+ItemDecoration的高度才会等于recyclerBottom）
+     */
+    public interface OnScrollBottomHelpListener {
+        boolean onScrollToBottom(int lastChildBottom, int recyclerBottom, int lastPosition, int itemCount);
+    }
+
     public void reset() {
         type = TYPE.NORMAL;
         mHasMore = true;
@@ -229,6 +286,15 @@ public class SwipeRecyclerViewDelegate<T> {
     }
 
     /**
+     * 获取HeaderView的个数
+     *
+     * @return
+     */
+    public int getHeadersCount() {
+        return mHeadAdapter.getHeadersCount();
+    }
+
+    /**
      * 添加FooterView
      *
      * @param view
@@ -244,6 +310,15 @@ public class SwipeRecyclerViewDelegate<T> {
      */
     public void removeFooterView(View view) {
         mHeadAdapter.removeFooterView(view);
+    }
+
+    /**
+     * 获取FooterView的个数
+     *
+     * @return
+     */
+    public int getFootersCount() {
+        return mHeadAdapter.getFootersCount();
     }
 
     /**
@@ -276,6 +351,36 @@ public class SwipeRecyclerViewDelegate<T> {
         this.mIFLoading = mIFLoading;
         this.mIFLoading.gone();
         addFooterView(this.mIFLoading.getView());
+    }
+
+    /**
+     * 获取全部的item数（包括headerView和footerView）
+     */
+    public int getItemCount() {
+        return mHeadAdapter != null ? mHeadAdapter.getItemCount() : 0;
+    }
+
+    /**
+     * 获取全部的item数（不包括headerView和footerView）
+     */
+    public int getContentItemCount() {
+        return mAdapter != null ? mAdapter.getItemCount() : 0;
+    }
+
+    public RecyclerViewAdapter<T> getAdapter() {
+        return this.mAdapter;
+    }
+
+    public void setOnItemClickListener(RecyclerViewAdapter.OnItemClickListener<T> l) {
+        if (mAdapter != null) {
+            mAdapter.setOnItemClickListener(l);
+        }
+    }
+
+    public void setOnItemLongClickListener(RecyclerViewAdapter.OnItemLongClickListener<T> l) {
+        if (mAdapter != null) {
+            mAdapter.setOnItemLongClickListener(l);
+        }
     }
 
     private void initLinearLayoutManager(int orientation) {
@@ -316,24 +421,4 @@ public class SwipeRecyclerViewDelegate<T> {
         mRecyclerView.setLayoutManager(mManager);
         /*mRecyclerView.setItemAnimator(null);*/
     }
-
-    /**
-     * 获取全部的item数（包括headerView和footerView）
-     */
-    public int getItemCount() {
-        return mHeadAdapter != null ? mHeadAdapter.getItemCount() : 0;
-    }
-
-    public void setOnItemClickListener(RecyclerViewAdapter.OnItemClickListener<T> l) {
-        if (mAdapter != null) {
-            mAdapter.setOnItemClickListener(l);
-        }
-    }
-
-    public void setOnItemLongClickListener(RecyclerViewAdapter.OnItemLongClickListener<T> l) {
-        if (mAdapter != null) {
-            mAdapter.setOnItemLongClickListener(l);
-        }
-    }
-
 }

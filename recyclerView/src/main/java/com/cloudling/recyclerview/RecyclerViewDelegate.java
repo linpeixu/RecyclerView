@@ -125,6 +125,15 @@ public class RecyclerViewDelegate<T> {
     }
 
     /**
+     * 获取HeaderView的个数
+     *
+     * @return
+     */
+    public int getHeadersCount() {
+        return mHeadAdapter.getHeadersCount();
+    }
+
+    /**
      * 添加FooterView
      *
      * @param view
@@ -140,6 +149,15 @@ public class RecyclerViewDelegate<T> {
      */
     public void removeFooterView(View view) {
         mHeadAdapter.removeFooterView(view);
+    }
+
+    /**
+     * 获取FooterView的个数
+     *
+     * @return
+     */
+    public int getFootersCount() {
+        return mHeadAdapter.getFootersCount();
     }
 
     /**
@@ -166,6 +184,36 @@ public class RecyclerViewDelegate<T> {
      */
     public void clear() {
         mAdapter.clear();
+    }
+
+    /**
+     * 获取全部的item数（包括headerView和footerView）
+     */
+    public int getItemCount() {
+        return mHeadAdapter != null ? mHeadAdapter.getItemCount() : 0;
+    }
+
+    /**
+     * 获取全部的item数（不包括headerView和footerView）
+     */
+    public int getContentItemCount() {
+        return mAdapter != null ? mAdapter.getItemCount() : 0;
+    }
+
+    public RecyclerViewAdapter<T> getAdapter() {
+        return this.mAdapter;
+    }
+
+    public void setOnItemClickListener(RecyclerViewAdapter.OnItemClickListener<T> l) {
+        if (mAdapter != null) {
+            mAdapter.setOnItemClickListener(l);
+        }
+    }
+
+    public void setOnItemLongClickListener(RecyclerViewAdapter.OnItemLongClickListener<T> l) {
+        if (mAdapter != null) {
+            mAdapter.setOnItemLongClickListener(l);
+        }
     }
 
     private void initLinearLayoutManager(int orientation) {
@@ -207,11 +255,6 @@ public class RecyclerViewDelegate<T> {
         /*mRecyclerView.setItemAnimator(null);*/
     }
 
-    public RecyclerViewAdapter<T> getAdapter() {
-        return this.mAdapter;
-    }
-
-
     /**
      * 分页（类似ViewPager）
      *
@@ -227,25 +270,10 @@ public class RecyclerViewDelegate<T> {
             @Override
             public int findTargetSnapPosition(RecyclerView.LayoutManager layoutManager, int velocityX,
                                               int velocityY) {
-                int targetPos = super.findTargetSnapPosition(layoutManager, velocityX, velocityY);
-                /*"滑到到"+targetPos+"位置"*/
-                /*Log.e("RecyclerViewDelegate", "滑到到" + targetPos + "位置");*/
-                return targetPos;
+                return super.findTargetSnapPosition(layoutManager, velocityX, velocityY);
             }
         };
         snapHelper.attachToRecyclerView(mRecyclerView);
-    }
-
-    public void setOnItemClickListener(RecyclerViewAdapter.OnItemClickListener<T> l) {
-        if (mAdapter != null) {
-            mAdapter.setOnItemClickListener(l);
-        }
-    }
-
-    public void setOnItemLongClickListener(RecyclerViewAdapter.OnItemLongClickListener<T> l) {
-        if (mAdapter != null) {
-            mAdapter.setOnItemLongClickListener(l);
-        }
     }
 
 }
